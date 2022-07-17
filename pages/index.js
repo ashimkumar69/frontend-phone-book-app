@@ -1,6 +1,10 @@
 import * as React from "react";
-import Image from "next/image";
-export default function Home() {
+import axios from "../helpers/axios-instance";
+import Link from "next/link";
+
+export default function Home(props) {
+  const { phoneBooks } = props;
+
   return (
     <React.Fragment>
       <nav className="navbar bg-light">
@@ -17,45 +21,60 @@ export default function Home() {
                 <div className="card">
                   <div className="card-header d-flex justify-content-between align-items-center">
                     <span>Phone Book List</span>
-
-                    <a href="#" className="btn btn-primary ">
-                      Create
-                    </a>
+                    <Link href="/phone-books/create">
+                      <a className="btn btn-primary">Create</a>
+                    </Link>
                   </div>
                   <div className="card-body">
-                    <table className="table table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th>SL</th>
-                          <th>Image</th>
-                          <th>Name</th>
-                          <th>Phone</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>1</td>
-                          <td>Image</td>
-                          <td>Name</td>
-                          <td>Phone</td>
-                          <td>
-                            <div
-                              className="btn-group"
-                              role="group"
-                              aria-label="Basic mixed styles example"
-                            >
-                              <button type="button" className="btn btn-success">
-                                Edit
-                              </button>
-                              <button type="button" className="btn btn-danger">
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <div className="table-responsive">
+                      <table className="table table-striped table-hover align-middle">
+                        <thead>
+                          <tr>
+                            <th>SL</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(phoneBooks || []).map((phoneBook, index) => (
+                            <tr key={index}>
+                              <td>{index + 1}</td>
+                              <td>
+                                <img
+                                  className="rounded"
+                                  src={phoneBook.image ?? "/images/default.png"}
+                                  width={50}
+                                  height={50}
+                                  alt={phoneBook.name}
+                                />
+                              </td>
+                              <td>{phoneBook.name}</td>
+                              <td>{phoneBook.phone}</td>
+                              <td>
+                                <div
+                                  className="btn-group"
+                                  role="group"
+                                  aria-label="Basic mixed styles example"
+                                >
+                                  <Link
+                                    href={`/phone-books/edit/${phoneBook.id}`}
+                                  >
+                                    <a
+                                      className="btn btn-primary"
+                                      role="button"
+                                    >
+                                      Edit
+                                    </a>
+                                  </Link>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -65,4 +84,14 @@ export default function Home() {
       </main>
     </React.Fragment>
   );
+}
+
+export async function getServerSideProps() {
+  const { data } = await axios.get("phone-books");
+
+  return {
+    props: {
+      phoneBooks: data.data,
+    },
+  };
 }
